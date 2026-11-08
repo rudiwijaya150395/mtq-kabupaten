@@ -433,7 +433,7 @@ body.lite .dome,body.lite.final .dome{filter:drop-shadow(0 0 14px rgba(243,210,1
    url   = alamat Web App Apps Script (berakhiran /exec)
    token = kode rahasia yang SAMA dengan TOKEN di Code.gs
    Setelah terisi dan di-deploy, semua HP/laptop langsung tersambung sendiri tanpa input apa pun. */
-var CFG={url:"",token:""};
+var CFG={url:"https://script.google.com/macros/s/AKfycbzsbmFlf-DkGoomCJgOKtqCXB30OemvaFl03vxELrlNnnbwYWK9BTfZsWj3AgV-4ZgU/exec",token:"1234"};
 var LITE=(function(){var q=location.search;if(/[?&]full\b/.test(q))return false;if(/[?&]lite\b/.test(q))return true;
   return !!(window.matchMedia&&matchMedia("(pointer:coarse)").matches)||Math.min(screen.width,screen.height)<700})();
 document.body.classList.toggle("lite",LITE);
