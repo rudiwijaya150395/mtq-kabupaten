@@ -85,6 +85,7 @@ details{border:1px solid var(--bd);border-radius:10px;padding:8px 10px;margin-to
 summary{cursor:pointer;color:var(--em);font-family:"Cormorant Garamond",serif;font-weight:700;font-size:1.25rem;min-height:36px}
 input,textarea,select{font:inherit;font-size:16px;background:var(--inp);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:8px;width:100%}
 input[type=color]{padding:2px;height:44px;cursor:pointer}
+input[type=range]{padding:0;height:36px;accent-color:#0b5a42}
 label.f{display:block;margin:6px 0;font-size:.9rem;color:var(--mut)}
 .cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .acat{border:1px solid var(--bd);border-radius:10px;padding:8px;margin-bottom:10px;background:#fffaf0}
@@ -421,6 +422,9 @@ body.lite .dome,body.lite.final .dome{filter:drop-shadow(0 0 14px rgba(243,210,1
       <p class="hint" id="logomsg"></p>
       <h2>Font tulisan paket</h2>
       <select id="fsel" aria-label="Jenis font paket"></select>
+      <h2>Ukuran huruf paket</h2>
+      <input type="range" id="fsz" min="50" max="150" step="5" aria-label="Ukuran huruf paket">
+      <p class="hint" id="fszv"></p>
       <h2>Warna paket</h2>
       <div class="cgrid" id="cgrid"></div>
       <label class="f">Warna tulisan paket<input type="color" id="tc"></label>
@@ -495,7 +499,7 @@ function defCats(){return [
  mk("Dekorasi (Putri)",[["Kufi","Diwani","Farisi","Naskhi","Riq’ah"],["Diwani Jali","Naskhi","Farisi","Diwani"],["Kufi","Riq’ah","Diwani","Naskhi","Farisi"]])
 ]}
 function defUI(){return {bism:"بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيمِ",title:"Musabaqah Seni Khat Al-Qur’an",sub:"Undian Materi Lomba · Tingkat Kabupaten",rP:"Babak Penyisihan",rF:"Babak Final",btn:"PUTAR",wait:"Menunggu operator memilih kategori",ready:"Undian siap · tekan PUTAR",credit:"Dibuat oleh: Panitia MSQ Kabupaten",ev:"",logo:""}}
-function defSty(){return {font:"Cormorant Garamond",tc:"#ffffff",colors:["#35a86a","#3d84e6","#ef9f1c","#e0485c","#9a68d4","#22b8c4"]}}
+function defSty(){return {font:"Cormorant Garamond",fs:100,tc:"#ffffff",colors:["#35a86a","#3d84e6","#ef9f1c","#e0485c","#9a68d4","#22b8c4"]}}
 var UIF=[["bism","Teks Arab (paling atas)"],["title","Judul"],["sub","Sub judul"],["ev","Tempat dan tanggal acara (kosongkan untuk menyembunyikan)"],["rP","Nama babak 1"],["rF","Nama babak 2"],["btn","Tulisan tombol putar"],["wait","Status sebelum kategori dipilih"],["ready","Status siap diputar"],["credit","Teks hak cipta di bawah halaman (kosongkan untuk menyembunyikan)"]];
 var FONTS=["Cormorant Garamond","Playfair Display","Cinzel","Lora","Amiri","Poppins","Montserrat","Reem Kufi","Aref Ruqaa"];
 function fresh(){return {pin:"1234",rounds:{p:defCats(),f:defCats()},hist:[],ui:defUI(),sty:defSty()}}
@@ -591,12 +595,27 @@ function buildDisc(P){
   for(i=0;i<n;i++){var pa2=i*seg,px=CC+Math.cos(pa2)*R*.955,py=CC+Math.sin(pa2)*R*.955;
     g.beginPath();g.arc(px,py,10,0,7);g.fillStyle="#f3d27a";g.fill();g.lineWidth=2.5;g.strokeStyle="rgba(255,255,255,.85)";g.stroke();
     g.beginPath();g.arc(px,py,4,0,7);g.fillStyle="#8a6410";g.fill()}
-  for(i=0;i<n;i++){
-    g.save();g.translate(CC,CC);g.rotate(i*seg+seg/2);
-    g.textAlign="center";g.textBaseline="middle";g.fillStyle=D.sty.tc;g.shadowColor="rgba(0,0,0,.45)";g.shadowBlur=8;
-    g.font="700 "+(n>6?48:70)+"px '"+D.sty.font+"',Georgia,serif";g.lineJoin="round";g.lineWidth=7;g.strokeStyle="rgba(0,0,0,.38)";g.strokeText(P[i].n,R*.6,0);g.fillText(P[i].n,R*.6,0);g.restore();
-  }
   g.restore();
+}
+/* ---------- Tulisan paket: selalu datar, ukuran otomatis dibatasi agar tidak keluar roda ---------- */
+var lblS=[],LBR=R*.63;
+function buildLabels(P){
+  var n=P.length||1,seg=2*Math.PI/n,r=LBR,
+      base=(n>6?48:70)*((+D.sty.fs||100)/100),
+      maxW=Math.min(R*.6,2*r*Math.tan(Math.min(seg/2,1.2))*.92);
+  lblS=P.map(function(p){
+    var m=document.createElement("canvas"),g=m.getContext("2d"),fs=base,txt=String(p.n==null?"":p.n);
+    function F(){return "700 "+fs+"px '"+D.sty.font+"',Georgia,serif"}
+    g.font=F();var w=g.measureText(txt).width;
+    if(w>maxW){fs=Math.max(10,fs*maxW/w);g.font=F();w=g.measureText(txt).width}
+    var pad=14,W=Math.ceil(w+pad*2),H=Math.ceil(fs*1.4+pad*2);
+    m.width=Math.ceil(W*K);m.height=Math.ceil(H*K);
+    g=m.getContext("2d");g.setTransform(K,0,0,K,0,0);
+    g.font=F();g.textAlign="center";g.textBaseline="middle";g.lineJoin="round";
+    g.lineWidth=Math.max(4,fs*.1);g.strokeStyle="rgba(0,0,0,.42)";g.strokeText(txt,W/2,H/2);
+    g.shadowColor="rgba(0,0,0,.45)";g.shadowBlur=8;g.fillStyle=D.sty.tc;g.fillText(txt,W/2,H/2);
+    return {c:m,w:W,h:H}
+  });
 }
 var lastRot=0,spd=0,lastKey="";
 function flows(t){
@@ -612,9 +631,9 @@ function flows(t){
   cx.restore();
 }
 function draw(t){
-  var P=pks(),s=P.map(function(p){return p.n}).join("|")+D.sty.font+D.sty.tc+D.sty.colors.join();
+  var P=pks(),s=P.map(function(p){return p.n}).join("|")+D.sty.font+D.sty.tc+D.sty.fs+D.sty.colors.join();
   var rebuilt=false;
-  if(s!==sig){sig=s;buildDisc(P);rebuilt=true}
+  if(s!==sig){sig=s;buildDisc(P);buildLabels(P);rebuilt=true}
   var n=P.length||1,seg=2*Math.PI/n;
   var dv=rot-lastRot;lastRot=rot;spd=spd*.82+Math.abs(dv)*.18;
   if(LITE&&!spinning&&!pausing){
@@ -634,6 +653,7 @@ function draw(t){
     cgr.addColorStop(.5,"rgba(255,255,255,0)");cgr.addColorStop(.56,"rgba(255,244,205,"+A*.7+")");cgr.addColorStop(.64,"rgba(255,255,255,0)");cgr.addColorStop(1,"rgba(255,255,255,0)");
     cx.save();cx.globalCompositeOperation="lighter";cx.beginPath();cx.arc(CC,CC,R,0,7);cx.fillStyle=cgr;cx.fill();cx.restore();
   }
+  if(lblS.length===n){for(var li=0;li<n;li++){var la=rot+(li+.5)*seg,L=lblS[li];cx.drawImage(L.c,CC+Math.cos(la)*LBR-L.w/2,CC+Math.sin(la)*LBR-L.h/2,L.w,L.h)}}
   cx.drawImage(glossC,0,0,S,S);
   if(winIdx>=0&&!spinning){
     cx.beginPath();cx.moveTo(CC,CC);cx.arc(CC,CC,R,rot+winIdx*seg,rot+(winIdx+1)*seg);cx.closePath();
@@ -863,9 +883,12 @@ function styRender(){
     l.appendChild(p);G.appendChild(l);
   });
   $("tc").value=D.sty.tc;
+  $("fsz").value=D.sty.fs||100;fszTxt();
   $("logourl").value=(D.ui.logo&&D.ui.logo.indexOf("data:")!==0)?D.ui.logo:"";
 }
 $("tc").oninput=function(){D.sty.tc=this.value;save()};
+function fszTxt(){$("fszv").textContent="Ukuran: "+(D.sty.fs||100)+"% (100% = standar). Tulisan tetap datar dan otomatis dikecilkan jika terlalu panjang supaya tidak keluar dari roda."}
+$("fsz").oninput=function(){D.sty.fs=+this.value;save();fszTxt()};
 $("logourl").oninput=function(){D.ui.logo=this.value.trim();save();applyUI()};
 $("logoclear").onclick=function(){D.ui.logo="";$("logourl").value="";$("logofile").value="";save();applyUI();$("logomsg").textContent="Logo dihapus."};
 $("logofile").onchange=function(){
