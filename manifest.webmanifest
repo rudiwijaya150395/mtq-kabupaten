@@ -1,7 +1,7 @@
 {
-  "name": "Undian Spin MSQ Kabupaten",
-  "short_name": "Undian MSQ",
-  "description": "Undian materi Musabaqah Seni Khat Al-Qur’an tingkat kabupaten",
+  "name": "Aplikasi SPIN Musabaqah Seni Kaligrafi Al-Quran",
+  "short_name": "Spin MSKQ",
+  "description": "Spin Undian Lomba materi Musabaqah Seni Kaligrafi Al-Quran",
   "lang": "id",
   "start_url": "./",
   "scope": "./",
